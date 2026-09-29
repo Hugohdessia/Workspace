@@ -24,7 +24,7 @@ def grafico(dados, titulo, sub, arq, rot):
     fig, ax = plt.subplots(figsize=(9, 5.2), dpi=150)
     xs = [str(a) for a in dados]
     vals = list(dados.values())
-    cores = ["#c0392b" if v > 0 else "#2e7d5b" for v in vals]
+    cores = ["#2e7d5b" if v > 0 else "#c0392b" for v in vals]
     bars = ax.bar(xs, vals, color=cores, width=.6)
     for b, v in zip(bars, vals):
         ax.annotate(f"{v:+.1f}%".replace(".", ","), (b.get_x() + b.get_width() / 2, v),
@@ -36,7 +36,7 @@ def grafico(dados, titulo, sub, arq, rot):
     ax.set_xlabel("Ano da eleição"); ax.set_ylabel(rot)
     ax.margins(y=.15)
     for s in ("top", "right"): ax.spines[s].set_visible(False)
-    fig.text(.01, .01, "Vermelho = dólar subiu | Verde = dólar caiu. PTAX venda, fim de ano.",
+    fig.text(.01, .01, "Verde = dólar subiu (valorizou) | Vermelho = dólar caiu. PTAX venda, fim de ano.",
              fontsize=8, color="#666")
     fig.tight_layout(rect=(0, .03, 1, 1)); fig.savefig(arq); plt.close(fig)
 
