@@ -52,6 +52,9 @@ for a in anos:
     v = um_ano[a]; c = cor(v)
     ax.plot([a, a + 1], [fim_ano[a], fim_ano[a + 1]], color=c, lw=5, solid_capstyle="round")
     ax.scatter([a, a + 1], [fim_ano[a], fim_ano[a + 1]], s=45, color=c, zorder=3)
+    for x, dx, ha in ((a, -.22, "right"), (a + 1, .22, "left")):
+        ax.text(x + dx, fim_ano[x], "R$ " + f"{fim_ano[x]:.2f}".replace(".", ","), ha=ha, va="center",
+                fontsize=9.5, color=MUTED)
     ax.text(a + .5, max(fim_ano[a], fim_ano[a + 1]) + .3, rot(v), ha="center", va="bottom",
             fontsize=16, fontweight="bold", color=c)
 fig.savefig("dolar_1_ano_pos_eleicao.png", facecolor=BG); plt.close(fig)
@@ -65,7 +68,10 @@ for k, a in enumerate(anos[:-1]):
     ym = (fim_ano[a] + fim_ano[b]) / 2
     ax.text((a + b) / 2 + .1, ym + .35, rot(v), ha="center", va="bottom", fontsize=16, fontweight="bold", color=c)
 ax.plot([2022, 2023], [fim_ano[2022], fim_ano[2023]], color="#a5aca2", lw=5, ls=(0, (1, 1.6)), solid_capstyle="round")
-ax.text(2023, fim_ano[2023] - .35, "em curso", ha="center", va="top", fontsize=11, color=MUTED, fontweight="bold")
+ax.text(2023, fim_ano[2023] - .35, "2023: R$ 4,84\n(em curso)", ha="center", va="top", fontsize=10.5, color=MUTED, fontweight="bold", linespacing=1.3)
 ax.scatter(anos, [fim_ano[a] for a in anos], s=110, color=BG, edgecolor=INK, lw=2.2, zorder=3)
+for a in anos:
+    ax.text(a, fim_ano[a] - .28, "R$ " + f"{fim_ano[a]:.2f}".replace(".", ","), ha="center", va="top",
+            fontsize=10.5, color=INK)
 ax.set_xticks(anos + [2023]); ax.set_xticklabels([str(a) for a in anos] + [""], color=INK, fontsize=12, fontweight="bold")
 fig.savefig("dolar_ciclo_4_anos.png", facecolor=BG); plt.close(fig)
