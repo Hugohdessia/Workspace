@@ -27,47 +27,65 @@ UP, DOWN, DEST = "#4a6741", "#b5523f", "#25331f"
 fam = "Liberation Sans" if any("Liberation Sans" in f.name for f in fm.fontManager.ttflist) else "DejaVu Sans"
 plt.rcParams["font.family"] = fam
 
-def grafico(dados, kicker, titulo, sub, arq, destaque, rotulo_dest, nota_dest=None):
+def base(kicker, titulo, sub, legenda):
     fig = plt.figure(figsize=(10, 5.6), dpi=200, facecolor=BG)
     fig.text(.04, .925, kicker, color=UP, fontsize=9, fontweight="bold")
     fig.text(.04, .845, titulo, color=INK, fontsize=24, fontweight="bold")
     fig.text(.04, .79, sub, color=MUTED, fontsize=10.5)
-    # legenda
-    for x, cor, lab in ((.04, UP, "Dólar subiu"), (.15, DOWN, "Dólar caiu"), (.26, DEST, rotulo_dest)):
+    x = .04
+    for cor, lab, w in legenda:
         fig.patches.append(plt.Rectangle((x, .725), .009, .016, transform=fig.transFigure, fc=cor))
         fig.text(x + .014, .726, lab, color=INK, fontsize=8, fontweight="bold")
-    ax = fig.add_axes([.04, .13, .92, .54], facecolor=BG)
-    xs = list(range(len(dados))); vals = list(dados.values())
-    top, bot = max(max(vals) * 1.22, 5), min(min(vals) * 1.30, -5)
-    ax.set_ylim(bot, top); ax.set_xlim(-.6, len(xs) - .4)
-    step = 20
-    for t in range(int(bot // step) * step, int(top // step + 1) * step + 1, step):
-        ax.axhline(t, color=GRID, lw=.8, zorder=0)
-    ax.axhline(0, color=INK, lw=1, zorder=1)
-    for x, (a, v) in zip(xs, dados.items()):
-        cor = DEST if a == destaque else (UP if v > 0 else DOWN)
-        ax.bar(x, v, width=.52, color=cor, zorder=2)
-        txt = f"{v:+.1f}%".replace(".", ",").replace("-", "\u2212")
-        off = (top - bot) * .015
-        ax.text(x, v + (off if v > 0 else -off), txt, ha="center",
-                va="bottom" if v > 0 else "top", color=INK, fontsize=12, fontweight="bold")
-        if a == destaque and nota_dest:
-            ax.text(x, (v + (off * 5.5 if v > 0 else -off * 5.5)), nota_dest, ha="center",
-                    va="bottom" if v > 0 else "top", color=INK, fontsize=7.5, fontweight="bold")
-    ax.set_xticks(xs); ax.set_xticklabels([str(a) for a in dados], color=INK, fontsize=11, fontweight="bold")
-    ax.tick_params(axis="x", length=0, pad=8)
-    ax.set_yticks([])
+        x += w
+    ax = fig.add_axes([.06, .12, .90, .56], facecolor=BG)
+    ax.set_xlim(2001.2, 2023.8); ax.set_ylim(0, 6.3)
+    ax.set_xticks(range(2002, 2024, 4) if False else [2002, 2006, 2010, 2014, 2018, 2022])
+    ax.set_xticklabels(["Eleição\n2002", "Eleição\n2006", "Eleição\n2010", "Eleição\n2014", "Eleição\n2018", "Eleição\n2022"],
+                       color=INK, fontsize=9.5, fontweight="bold")
+    ax.set_yticks(range(0, 7)); ax.set_yticklabels([f"R$ {t}" for t in range(0, 7)], color=MUTED, fontsize=8.5)
+    ax.tick_params(length=0, pad=6)
+    ax.grid(axis="y", color=GRID, lw=.8); ax.set_axisbelow(True)
     for sp in ax.spines.values(): sp.set_visible(False)
-    fig.text(.96, .04, "Fonte: Banco Central (PTAX de venda, último dia útil do ano) · Base: fim do ano da eleição",
+    fig.text(.96, .03, "Fonte: Banco Central (PTAX de venda, último dia útil do ano). Cotação de fim de ano.",
              color=MUTED, fontsize=7.5, ha="right", style="italic")
-    fig.text(.04, .04, "Ano da eleição", color=MUTED, fontsize=8)
-    fig.savefig(arq, facecolor=BG); plt.close(fig)
+    fig.text(.04, .03, "Dólar em R$ no fim de cada ano", color=MUTED, fontsize=8)
+    return fig, ax
 
-grafico(um_ano, "BRASIL  ·  DÓLAR / REAL",
-        "O que o dólar fez no ano seguinte à eleição",
-        "Em 3 das 6 eleições o dólar caiu no 1º ano. Em 2014 disparou +47,0%.",
-        "dolar_1_ano_pos_eleicao.png", 2014, "Maior alta", "MAIOR ALTA")
-grafico(quatro, "BRASIL  ·  DÓLAR / REAL",
-        "Ciclos de 4 anos: o dólar subiu nos 3 últimos",
-        "Caiu nos ciclos de 2002 e 2006; desde 2010 sobe mais de 30% a cada mandato. O ciclo de 2022 ainda não terminou.",
-        "dolar_ciclo_4_anos.png", 2010, "Maior alta", "MAIOR ALTA")
+def rot(v): return f"{v:+.1f}%".replace(".", ",").replace("-", "\u2212")
+
+# ---- 1) Linha do tempo: 1 ano após cada eleição
+fig, ax = base("BRASIL  ·  DÓLAR / REAL", "O dólar no 1º ano depois de cada eleição",
+               "Cada trecho colorido liga o fim do ano da eleição ao fim do ano seguinte.",
+               [(UP, "Dólar subiu", .11), (DOWN, "Dólar caiu", .11)])
+for a in anos:
+    v = um_ano[a]; c = UP if v > 0 else DOWN
+    ax.axvline(a, color=GRID, lw=1.2, zorder=1)
+    ax.plot([a, a + 1], [fim_ano[a], fim_ano[a + 1]], color=c, lw=4.5, solid_capstyle="round", zorder=3)
+    ax.scatter([a], [fim_ano[a]], s=70, color=BG, edgecolor=INK, lw=1.8, zorder=4)
+    ax.scatter([a + 1], [fim_ano[a + 1]], s=70, color=c, edgecolor=c, zorder=4)
+    y = max(fim_ano[a], fim_ano[a + 1]) + .35
+    ax.annotate(rot(v), (a + .5, y), ha="center", va="bottom", fontsize=12.5, fontweight="bold",
+                color=INK, bbox=dict(boxstyle="round,pad=.3", fc=BG, ec=c, lw=1.6), zorder=5)
+    ax.text(a, fim_ano[a] - .28, f"{fim_ano[a]:.2f}".replace(".", ","), ha="center", va="top", fontsize=8, color=MUTED)
+    ax.text(a + 1.12, fim_ano[a + 1], f"{fim_ano[a + 1]:.2f}".replace(".", ","), ha="left", va="center", fontsize=8, color=MUTED)
+fig.savefig("dolar_1_ano_pos_eleicao.png", facecolor=BG); plt.close(fig)
+
+# ---- 2) Linha do tempo: ciclos de 4 anos
+fig, ax = base("BRASIL  ·  DÓLAR / REAL", "Ciclos de 4 anos: o dólar subiu nos 3 últimos",
+               "Do fim de um ano eleitoral ao fim do seguinte. O ciclo de 2022 ainda não terminou.",
+               [(UP, "Dólar subiu", .11), (DOWN, "Dólar caiu", .11), (MUTED, "Em curso", .1)])
+for k, a in enumerate(anos[:-1]):
+    b = anos[k + 1]; v = quatro[a]; c = UP if v > 0 else DOWN
+    if k % 2 == 0: ax.axvspan(a, b, color="#eaeee7", zorder=0)
+    ax.plot([a, b], [fim_ano[a], fim_ano[b]], color=c, lw=4.5, solid_capstyle="round", zorder=3)
+    ax.annotate(rot(v), ((a + b) / 2, 5.95), ha="center", va="top", fontsize=13.5, fontweight="bold",
+                color=INK, bbox=dict(boxstyle="round,pad=.35", fc=BG, ec=c, lw=1.8), zorder=5)
+    ax.text((a + b) / 2, 5.3, f"{a} \u2192 {b}", ha="center", va="top", fontsize=8.5, color=MUTED)
+ax.plot([2022, 2023], [fim_ano[2022], fim_ano[2023]], color=MUTED, lw=3.5, ls=(0, (2, 2)), zorder=3)
+ax.axvspan(2022, 2023.8, color="#eaeee7", zorder=0)
+ax.text(2023.1, 5.3, "2022 \u2192 ?", ha="center", va="top", fontsize=8.5, color=MUTED)
+ax.text(2023.1, 5.95, "em curso", ha="center", va="top", fontsize=11, fontweight="bold", color=MUTED)
+for a in anos:
+    ax.scatter([a], [fim_ano[a]], s=80, color=BG, edgecolor=INK, lw=2, zorder=4)
+    ax.text(a, fim_ano[a] - .3, f"{fim_ano[a]:.2f}".replace(".", ","), ha="center", va="top", fontsize=8.5, color=INK, fontweight="bold")
+fig.savefig("dolar_ciclo_4_anos.png", facecolor=BG); plt.close(fig)
