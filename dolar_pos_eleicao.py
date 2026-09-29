@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 fim_ano = {2002: 3.5325, 2003: 2.8884, 2006: 2.1380, 2007: 1.7713, 2010: 1.6662,
            2011: 1.8758, 2014: 2.6562, 2015: 3.9048, 2018: 3.8748, 2019: 4.0307,
            2022: 5.2177, 2023: 4.8413}
+# Anos após 2022 (ciclo em curso): PTAX fim de 2024 e 2025; 2026 = cotação de meados de set/2026 (aprox.)
+curso = {2023: 4.8413, 2024: 6.1923, 2025: 5.5018, 2026: 5.15}
 tabela = {2002: -18.2, 2006: -17.2, 2010: 12.6, 2014: 47.0, 2018: 4.0, 2022: -7.2}
 tabela4 = {2002: -39.5, 2006: -22.1, 2010: 59.4, 2014: 45.9, 2018: 34.7}
 
@@ -61,19 +63,23 @@ fig.savefig("dolar_1_ano_pos_eleicao.png", facecolor=BG); plt.close(fig)
 
 # ---- 2) ciclos de 4 anos
 fig, ax = base("Ciclos de 4 anos: o dólar subiu nos 3 últimos",
-               "Variação do fim de uma eleição ao fim da seguinte")
+               "Variação do fim de uma eleição ao fim da seguinte. O ciclo de 2022 termina em outubro de 2026 (dado parcial)")
 for k, a in enumerate(anos[:-1]):
     b = anos[k + 1]; v = quatro[a]; c = cor(v)
     ax.plot([a, b], [fim_ano[a], fim_ano[b]], color=c, lw=5, solid_capstyle="round")
     ym = (fim_ano[a] + fim_ano[b]) / 2
     ax.text((a + b) / 2 + .1, ym + .35, rot(v), ha="center", va="bottom", fontsize=16, fontweight="bold", color=c)
-ax.plot([2022, 2023], [fim_ano[2022], fim_ano[2023]], color="#a5aca2", lw=5, ls=(0, (1, 1.6)), solid_capstyle="round")
-ax.text(2023, fim_ano[2023] - .35, "2023: R$ 4,84\n(em curso)", ha="center", va="top", fontsize=10.5, color=MUTED, fontweight="bold", linespacing=1.3)
+cx = [2022, 2023, 2024, 2025, 2026]; cy = [fim_ano[2022]] + [curso[y] for y in cx[1:]]
+ax.plot(cx, cy, color="#a5aca2", lw=5, ls=(0, (1, 1.6)), solid_capstyle="round")
+ax.scatter(cx[1:], cy[1:], s=40, color="#a5aca2", zorder=3)
+ax.text(2026, curso[2026] - .35, "set/2026: R$ 5,15\n" + rot((curso[2026] / fim_ano[2022] - 1) * 100) + " até agora", ha="center", va="top", fontsize=10.5, color=MUTED, fontweight="bold", linespacing=1.3)
+ax.text(2024, curso[2024] + .2, "R$ 6,19", ha="center", va="bottom", fontsize=9.5, color=MUTED)
 ax.scatter(anos, [fim_ano[a] for a in anos], s=110, color=BG, edgecolor=INK, lw=2.2, zorder=3)
 for a in anos:
     ax.text(a, fim_ano[a] - .28, "R$ " + f"{fim_ano[a]:.2f}".replace(".", ","), ha="center", va="top",
             fontsize=10.5, color=INK)
-ax.set_xticks(anos + [2023]); ax.set_xticklabels([str(a) for a in anos] + [""], color=INK, fontsize=12, fontweight="bold")
+ax.set_xlim(2001, 2027.3); ax.set_ylim(0.6, 6.9)
+ax.set_xticks(anos + [2026]); ax.set_xticklabels([str(a) for a in anos] + ["2026"], color=INK, fontsize=12, fontweight="bold")
 fig.savefig("dolar_ciclo_4_anos.png", facecolor=BG); plt.close(fig)
 
 # ---- 3) USD/BRL x DXY por ciclo
