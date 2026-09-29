@@ -20,27 +20,51 @@ for a in anos:
     print(a, f"{um_ano[a]:+.1f} ({tabela[a]:+.1f})",
           f"{quatro[a]:+.1f} ({tabela4[a]:+.1f})" if a in quatro else "-")
 
-def grafico(dados, titulo, sub, arq, rot):
-    fig, ax = plt.subplots(figsize=(9, 5.2), dpi=150)
-    xs = [str(a) for a in dados]
-    vals = list(dados.values())
-    cores = ["#2e7d5b" if v > 0 else "#c0392b" for v in vals]
-    bars = ax.bar(xs, vals, color=cores, width=.6)
-    for b, v in zip(bars, vals):
-        ax.annotate(f"{v:+.1f}%".replace(".", ","), (b.get_x() + b.get_width() / 2, v),
-                    ha="center", va="bottom" if v > 0 else "top", fontsize=11,
-                    xytext=(0, 4 if v > 0 else -4), textcoords="offset points")
-    ax.axhline(0, color="#444", lw=.8)
-    ax.set_title(titulo, loc="left", fontsize=14, fontweight="bold")
-    ax.text(0, 1.02, sub, transform=ax.transAxes, fontsize=9, color="#555")
-    ax.set_xlabel("Ano da eleição"); ax.set_ylabel(rot)
-    ax.margins(y=.15)
-    for s in ("top", "right"): ax.spines[s].set_visible(False)
-    fig.text(.01, .01, "Verde = dólar subiu (valorizou) | Vermelho = dólar caiu. PTAX venda, fim de ano.",
-             fontsize=8, color="#666")
-    fig.tight_layout(rect=(0, .03, 1, 1)); fig.savefig(arq); plt.close(fig)
+from matplotlib.patches import FancyBboxPatch
 
-grafico(um_ano, "Dólar 1 ano após a eleição", "Variação do fim do ano eleitoral ao fim do ano seguinte",
-        "dolar_1_ano_pos_eleicao.png", "Variação do dólar (%)")
-grafico(quatro, "Dólar em ciclos de 4 anos", "Variação do fim do ano eleitoral ao fim do ano da eleição seguinte (2022 ainda em curso)",
-        "dolar_ciclo_4_anos.png", "Variação do dólar (%)")
+BG, FG, MUTED, GRID = "#0f1115", "#f2f4f8", "#8b93a3", "#232733"
+UP, DOWN = "#2ecc8f", "#ff5c6c"
+plt.rcParams["font.family"] = ["DejaVu Sans"]
+
+def grafico(dados, titulo, sub, arq, nota, ncls=None):
+    fig = plt.figure(figsize=(10, 6.2), dpi=200, facecolor=BG)
+    ax = fig.add_axes([.08, .14, .86, .60], facecolor=BG)
+    xs = list(range(len(dados)))
+    vals = list(dados.values())
+    lim = max(abs(v) for v in vals) * 1.28
+    ax.set_ylim(min(min(vals) * 1.35, -lim * .08), max(max(vals) * 1.25, lim * .1))
+    ax.set_xlim(-.6, len(xs) - .4)
+    for v in range(-100, 101, 20):
+        ax.axhline(v, color=GRID, lw=.8, zorder=0)
+    ax.axhline(0, color=MUTED, lw=1.1, zorder=1)
+    for x, v in zip(xs, vals):
+        c = UP if v > 0 else DOWN
+        ax.bar(x, v, width=.56, color=c, zorder=2)
+        txt = f"{v:+.1f}%".replace(".", ",").replace("-", "\u2212")
+        ax.text(x, v + (lim * .03 if v > 0 else -lim * .03), txt, ha="center",
+                va="bottom" if v > 0 else "top", color=FG, fontsize=14, fontweight="bold")
+    ax.set_xticks(xs)
+    ax.set_xticklabels([str(a) for a in dados], color=FG, fontsize=13, fontweight="bold")
+    ax.tick_params(axis="x", length=0, pad=10)
+    ax.set_yticks([t for t in range(-100, 101, 20) if -lim <= t <= lim])
+    ax.set_yticklabels([f"{t}%".replace("-", "\u2212") for t in ax.get_yticks()], color=MUTED, fontsize=10)
+    ax.tick_params(axis="y", length=0)
+    for sp in ax.spines.values(): sp.set_visible(False)
+    fig.text(.08, .93, titulo, color=FG, fontsize=22, fontweight="bold")
+    fig.text(.08, .875, sub, color=MUTED, fontsize=11.5)
+    # legenda
+    fig.patches.append(plt.Rectangle((.08, .795), .012, .02, transform=fig.transFigure, fc=UP))
+    fig.text(.098, .797, "Dólar subiu", color=FG, fontsize=10.5)
+    fig.patches.append(plt.Rectangle((.21, .795), .012, .02, transform=fig.transFigure, fc=DOWN))
+    fig.text(.228, .797, "Dólar caiu", color=FG, fontsize=10.5)
+    fig.text(.08, .05, "Ano da eleição", color=MUTED, fontsize=10)
+    fig.text(.08, .02, nota, color=MUTED, fontsize=8.5)
+    fig.savefig(arq, facecolor=BG); plt.close(fig)
+
+fonte = "Fonte: PTAX de venda (Banco Central), último dia útil de cada ano. Base: fim do ano da eleição."
+grafico(um_ano, "Dólar 1 ano após a eleição",
+        "Variação do dólar em reais, do fim do ano eleitoral ao fim do ano seguinte",
+        "dolar_1_ano_pos_eleicao.png", fonte)
+grafico(quatro, "Dólar em ciclos de 4 anos",
+        "Variação do dólar em reais até a eleição seguinte (ciclo de 2022 ainda em curso)",
+        "dolar_ciclo_4_anos.png", fonte)
