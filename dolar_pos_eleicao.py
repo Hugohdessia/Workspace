@@ -75,3 +75,30 @@ for a in anos:
             fontsize=10.5, color=INK)
 ax.set_xticks(anos + [2023]); ax.set_xticklabels([str(a) for a in anos] + [""], color=INK, fontsize=12, fontweight="bold")
 fig.savefig("dolar_ciclo_4_anos.png", facecolor=BG); plt.close(fig)
+
+# ---- 3) USD/BRL x DXY por ciclo
+# DXY fim de ano: 2014 em diante conferido por variações anuais publicadas; 2002-2010 de memória (não verificado)
+dxy = {2002: 101.7, 2006: 83.7, 2010: 79.0, 2014: 90.3, 2018: 96.2, 2022: 103.5}
+BLUE = "#3b6ea8"
+fig, ax = base("Dólar no Brasil x dólar no mundo",
+               "Base 100 no fim de 2002. USD/BRL contra o DXY (índice do dólar frente às principais moedas)")
+ax.set_ylim(20, 165)
+brl = [fim_ano[a] / fim_ano[2002] * 100 for a in anos]
+dx = [dxy[a] / dxy[2002] * 100 for a in anos]
+ax.axhline(100, color=GRID, lw=1.2, zorder=0)
+ax.plot(anos, brl, color=UP, lw=5, solid_capstyle="round")
+ax.plot(anos, dx, color=BLUE, lw=5, solid_capstyle="round")
+ax.scatter(anos, brl, s=90, color=BG, edgecolor=UP, lw=2.4, zorder=3)
+ax.scatter(anos, dx, s=90, color=BG, edgecolor=BLUE, lw=2.4, zorder=3)
+ax.text(2022.35, brl[-1], f"Dólar (USD/BRL)\n{brl[-1]-100:+.0f}% desde 2002".replace("-", "−"), color=UP,
+        fontsize=10.5, fontweight="bold", va="center")
+ax.text(2022.35, dx[-1] - 6, f"DXY\n{dx[-1]-100:+.0f}% desde 2002".replace("-", "−"), color=BLUE,
+        fontsize=10.5, fontweight="bold", va="center")
+ax.set_xlim(2001, 2026.2)
+for k, a in enumerate(anos[:-1]):
+    b = anos[k + 1]; m = (a + b) / 2
+    vb = (fim_ano[b] / fim_ano[a] - 1) * 100; vd = (dxy[b] / dxy[a] - 1) * 100
+    ax.text(m, 27, f"Dólar {rot(vb)}", color=UP, fontsize=10.5, fontweight="bold", ha="center")
+    ax.text(m, 21, f"DXY {rot(vd)}", color=BLUE, fontsize=10.5, fontweight="bold", ha="center")
+fig.text(.05, .04, "DXY 2002–2010 estimado, sem conferência em fonte.", color=MUTED, fontsize=8)
+fig.savefig("dolar_vs_dxy.png", facecolor=BG); plt.close(fig)
