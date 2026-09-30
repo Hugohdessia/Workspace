@@ -12,7 +12,7 @@ BRAS, BRAS2, BLUE, GREY = "#b5523f", "#d9a79b", "#3b6ea8", "#9fb2c7"
 plt.rcParams["font.family"] = "Liberation Sans" if any("Liberation Sans" in f.name for f in fm.fontManager.ttflist) else "DejaVu Sans"
 vb = lambda v: f"{v:.1f}".replace(".", ",") + "%"
 
-ordem = ["Economias avançadas", "Brasil (FMI)", "Mundo (média)", "Brasil (Banco Central)", "Mercados emergentes", "América Latina e Caribe"]
+ordem = ["Economias avançadas", "Brasil (FMI)", "Brasil (Banco Central)", "Mercados emergentes", "América Latina e Caribe"]
 nomes = {"Economias avançadas": "Economias avançadas", "Brasil (FMI)": "Brasil (FMI)", "Mundo (média)": "Mundo (média)",
          "Brasil (Banco Central)": "Brasil (Banco Central, ago/26)", "Mercados emergentes": "Mercados emergentes", "América Latina e Caribe": "América Latina e Caribe"}
 cores = {"Brasil (FMI)": BRAS, "Brasil (Banco Central)": BRAS2}
