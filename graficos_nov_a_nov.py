@@ -75,8 +75,7 @@ for e in ELEICOES:
     for x, dx, ha, k in ((e, -.14, "right", a), (e + 1, .14, "left", b)):
         ax.text(x + dx, brl[k], rs(brl[k]), ha=ha, va="center", fontsize=8.5, color=MUTED)
     y = max(brl[a], brl[b]) + .3
-    ax.text(e + .5, y + .32, rot(v), ha="center", va="bottom", fontsize=16, fontweight="bold", color=c)
-    ax.text(e + .5, y, f"DXY {rot(var(dxy, a, b))}", ha="center", va="bottom", fontsize=10, fontweight="bold", color=BLUE)
+    ax.text(e + .5, y, rot(v), ha="center", va="bottom", fontsize=16, fontweight="bold", color=c)
 xt(ax, ELEICOES, [f"Nov/{e}" for e in ELEICOES])
 fig.savefig("grafico_1_ano_nov_a_nov.png", facecolor=BG); plt.close(fig)
 
@@ -88,12 +87,11 @@ for i, e in enumerate(pts[:-1]):
     a, b = ciclo[e]; v = var(brl, a, b); c = cor(v); n = pts[i + 1]
     ax.plot([e, n], [brl[a], brl[b]], color=c, lw=5, solid_capstyle="round")
     ym = (brl[a] + brl[b]) / 2
-    ax.text((e + n) / 2 - .35, ym + 1.0, rot(v), ha="center", va="bottom", fontsize=16, fontweight="bold", color=c)
-    ax.text((e + n) / 2 - .35, ym + .68, f"DXY {rot(var(dxy, a, b))}", ha="center", va="bottom", fontsize=10, fontweight="bold", color=BLUE)
+    ax.text((e + n) / 2 - .35, ym + .7, rot(v), ha="center", va="bottom", fontsize=16, fontweight="bold", color=c)
 a, b = ciclo[2022]; v = var(brl, a, b)
 ax.plot([2022, 2026.75], [brl[a], brl[b]], color="#a5aca2", lw=5, ls=(0, (1, 1.6)), solid_capstyle="round")
 ax.scatter([2026.75], [brl[b]], s=40, color="#a5aca2", zorder=3)
-ax.text(2026.2, brl[b] - .5, f"até set/2026\n{rot(v)}\nDXY {rot(var(dxy, a, b))}", ha="center", va="top", fontsize=10, color=MUTED, fontweight="bold", linespacing=1.35)
+ax.text(2026.2, brl[b] - .5, f"até set/2026\n{rot(v)}", ha="center", va="top", fontsize=10, color=MUTED, fontweight="bold", linespacing=1.35)
 ax.scatter(pts, [brl[(e, 11)] for e in pts], s=110, color=BG, edgecolor=INK, lw=2.2, zorder=3)
 for e in pts: ax.text(e, brl[(e, 11)] - .28, rs(brl[(e, 11)]), ha="center", va="top", fontsize=10.5, color=INK)
 xt(ax, pts + [2026.75], [f"Nov/{e}" for e in pts] + ["Set/2026"])
@@ -114,7 +112,6 @@ for i, e in enumerate(ELEICOES):
     if i % 2 == 0: ax.axvspan(x0, x1, color="#eaeee7", zorder=0)
     m = (x0 + x1) / 2
     ax.text(m, 216, f"Dólar {rot(var(brl, a, b))}", color=UP, fontsize=10.5, fontweight="bold", ha="center", va="top")
-    ax.text(m, 202, f"DXY {rot(var(dxy, a, b))}", color=BLUE, fontsize=10.5, fontweight="bold", ha="center", va="top")
 ax.axhline(100, color=GRID, lw=1, zorder=0)
 ax.text(xs[-1] + .15, brl[HOJE] / b0 * 100, f"Dólar\n{rot(var(brl, (2002, 11), HOJE), 0)}\ndesde nov/2002", color=UP, fontsize=9.5, fontweight="bold", va="center")
 ax.text(xs[-1] + .15, dxy[HOJE] / d0 * 100, f"DXY\n{rot(var(dxy, (2002, 11), HOJE), 0)}", color=BLUE, fontsize=9.5, fontweight="bold", va="center")
