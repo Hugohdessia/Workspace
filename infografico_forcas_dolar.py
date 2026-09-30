@@ -8,7 +8,7 @@ from PIL import Image
 
 BG, INK, MUTED = "#f4f6f3", "#1b2419", "#5f6b5c"
 UP, DOWN, BLUE, NEUTRO = "#4a6741", "#b5523f", "#3b6ea8", "#8f978c"
-T_SOBE, T_CAI, T_MIX = "#f1e1dc", "#e0eadc", "#e9ece6"
+T_SOBE, T_CAI, T_MIX = "#e0eadc", "#f1e1dc", "#e9ece6"   # dólar sobe = verde (bom para quem tem dólar), cai = vermelho
 plt.rcParams["font.family"] = "Liberation Sans" if any("Liberation Sans" in f.name for f in fm.fontManager.ttflist) else "DejaVu Sans"
 FLAG = Image.open("imagens/bandeira_brasil.webp").convert("RGB")
 USD = Image.open("imagens/dolar_nota.jpg").convert("RGB")
