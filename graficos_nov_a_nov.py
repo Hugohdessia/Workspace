@@ -72,8 +72,8 @@ for e in ELEICOES:
     a, b = um[e]; v = var(brl, a, b); c = cor(v)
     ax.plot([e, e + 1], [brl[a], brl[b]], color=c, lw=5, solid_capstyle="round")
     ax.scatter([e, e + 1], [brl[a], brl[b]], s=45, color=c, zorder=3)
-    for x, dx, ha, k in ((e, -.22, "right", a), (e + 1, .22, "left", b)):
-        ax.text(x + dx, brl[k], rs(brl[k]), ha=ha, va="center", fontsize=9.5, color=MUTED)
+    for x, dx, ha, k in ((e, -.14, "right", a), (e + 1, .14, "left", b)):
+        ax.text(x + dx, brl[k], rs(brl[k]), ha=ha, va="center", fontsize=8.5, color=MUTED)
     y = max(brl[a], brl[b]) + .3
     ax.text(e + .5, y + .32, rot(v), ha="center", va="bottom", fontsize=16, fontweight="bold", color=c)
     ax.text(e + .5, y, f"DXY {rot(var(dxy, a, b))}", ha="center", va="bottom", fontsize=10, fontweight="bold", color=BLUE)
@@ -81,15 +81,15 @@ xt(ax, ELEICOES, [f"Nov/{e}" for e in ELEICOES])
 fig.savefig("grafico_1_ano_nov_a_nov.png", facecolor=BG); plt.close(fig)
 
 # ---- 2) ciclo de 4 anos
-fig, ax = base("Ciclos de 4 anos: o dólar subiu nos 3 últimos",
+fig, ax = base("Ciclos de 4 anos: o dólar subiu nos 3 últimos fechados",
                "Variação de novembro de uma eleição a novembro da seguinte. O ciclo de 2022 é parcial (até set/2026)", 2027.6, 7.0, FONTE)
 pts = ELEICOES
 for i, e in enumerate(pts[:-1]):
     a, b = ciclo[e]; v = var(brl, a, b); c = cor(v); n = pts[i + 1]
     ax.plot([e, n], [brl[a], brl[b]], color=c, lw=5, solid_capstyle="round")
     ym = (brl[a] + brl[b]) / 2
-    ax.text((e + n) / 2 - .35, ym + .78, rot(v), ha="center", va="bottom", fontsize=16, fontweight="bold", color=c)
-    ax.text((e + n) / 2 - .35, ym + .48, f"DXY {rot(var(dxy, a, b))}", ha="center", va="bottom", fontsize=10, fontweight="bold", color=BLUE)
+    ax.text((e + n) / 2 - .35, ym + 1.0, rot(v), ha="center", va="bottom", fontsize=16, fontweight="bold", color=c)
+    ax.text((e + n) / 2 - .35, ym + .68, f"DXY {rot(var(dxy, a, b))}", ha="center", va="bottom", fontsize=10, fontweight="bold", color=BLUE)
 a, b = ciclo[2022]; v = var(brl, a, b)
 ax.plot([2022, 2026.75], [brl[a], brl[b]], color="#a5aca2", lw=5, ls=(0, (1, 1.6)), solid_capstyle="round")
 ax.scatter([2026.75], [brl[b]], s=40, color="#a5aca2", zorder=3)
@@ -116,8 +116,8 @@ for i, e in enumerate(ELEICOES):
     ax.text(m, 216, f"Dólar {rot(var(brl, a, b))}", color=UP, fontsize=10.5, fontweight="bold", ha="center", va="top")
     ax.text(m, 202, f"DXY {rot(var(dxy, a, b))}", color=BLUE, fontsize=10.5, fontweight="bold", ha="center", va="top")
 ax.axhline(100, color=GRID, lw=1, zorder=0)
-ax.text(xs[-1] + .15, brl[HOJE] / b0 * 100, f"Dólar\n{rot(var(brl, (2002, 11), HOJE), 0)} desde nov/2002", color=UP, fontsize=9.5, fontweight="bold", va="center")
+ax.text(xs[-1] + .15, brl[HOJE] / b0 * 100, f"Dólar\n{rot(var(brl, (2002, 11), HOJE), 0)}\ndesde nov/2002", color=UP, fontsize=9.5, fontweight="bold", va="center")
 ax.text(xs[-1] + .15, dxy[HOJE] / d0 * 100, f"DXY\n{rot(var(dxy, (2002, 11), HOJE), 0)}", color=BLUE, fontsize=9.5, fontweight="bold", va="center")
-ax.set_xlim(2002.5, 2029.3)
+ax.set_xlim(2001.6, 2030.2)
 xt(ax, [xn((e, 11)) for e in ELEICOES], [f"Nov/{e}" for e in ELEICOES])
 fig.savefig("grafico_usdbrl_vs_dxy_nov_a_nov.png", facecolor=BG); plt.close(fig)
