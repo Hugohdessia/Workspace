@@ -48,7 +48,7 @@ UP, DOWN, BLUE = "#4a6741", "#b5523f", "#3b6ea8"
 plt.rcParams["font.family"] = "Liberation Sans" if any("Liberation Sans" in f.name for f in fm.fontManager.ttflist) else "DejaVu Sans"
 rot = lambda v, d=1: f"{v:+.{d}f}%".replace(".", ",").replace("-", "−")
 cor = lambda v: UP if v > 0 else DOWN
-rs = lambda v: "R$ " + f"{v:.2f}".replace(".", ",")
+rs = lambda v: "R\\$ " + f"{v:.2f}".replace(".", ",")
 
 def base(titulo, sub, xmax, ymax, fonte):
     fig = plt.figure(figsize=(10, 5.6), dpi=200, facecolor=BG)
@@ -64,37 +64,73 @@ def base(titulo, sub, xmax, ymax, fonte):
 FONTE = "Fonte: Investing (fechamento mensal). Base: fechamento de novembro do ano da eleição"
 xt = lambda ax, pos, labs: (ax.set_xticks(pos), ax.set_xticklabels(labs, color=INK, fontsize=11, fontweight="bold"))
 
-# ---- 1) 1 ano depois
-fig, ax = base("O dólar no 1º ano de cada governo", "Variação de novembro do ano da eleição a novembro do ano seguinte", 2026.8, 6.6, FONTE)
-seq = [x for e in ELEICOES if e < 2022 or True for x in ((e, brl[(e, 11)]), (e + 1, brl[(e + 1, 11)]))]
-ax.plot([p[0] for p in seq], [p[1] for p in seq], color="#cfd5cb", lw=3, zorder=0)
+# ---- série mensal contínua (fechamento do mês) para os gráficos 1 e 2
+xm = lambda k: k[0] + k[1] / 12          # fim do mês k
+serie = sorted(k for k in brl if k >= (2002, 6))
+SX = [xm(k) for k in serie]; SY = [brl[k] for k in serie]
+tint = lambda c, a=.13: matplotlib.colors.to_rgba(c, a)
+
+def base_mensal(titulo, sub, ymax=7.0):
+    fig = plt.figure(figsize=(10, 5.6), dpi=200, facecolor=BG)
+    fig.text(.05, .86, titulo, color=INK, fontsize=24, fontweight="bold")
+    fig.text(.05, .795, sub, color=MUTED, fontsize=11)
+    ax = fig.add_axes([.07, .14, .89, .58], facecolor=BG)
+    ax.set_xlim(2002.3, 2027.2); ax.set_ylim(1.2, ymax)
+    for v in (2, 3, 4, 5, 6):
+        ax.axhline(v, color=GRID, lw=.8, zorder=0)
+        ax.text(2002.2, v, f"R\\$ {v}", ha="right", va="center", fontsize=8.5, color=MUTED)
+    ax.set_yticks([])
+    for sp in ax.spines.values(): sp.set_visible(False)
+    yrs = list(range(2003, 2027)); el = {e + 11 / 12 for e in ELEICOES}
+    anos_t = [y for y in range(2002, 2027) if y in ELEICOES or (y - 2002) % 4 == 2 or y == 2026]
+    ax.set_xticks([y + 11 / 12 for y in anos_t])
+    ax.set_xticklabels([f"Nov/{y}" if y in ELEICOES else str(y) for y in anos_t], fontsize=8, color=MUTED, rotation=0)
+    for lab, y in zip(ax.get_xticklabels(), anos_t):
+        if y in ELEICOES: lab.set_color(INK); lab.set_fontweight("bold"); lab.set_fontsize(9.5)
+    ax.tick_params(axis="x", length=0, pad=8)
+    fig.text(.95, .04, FONTE, color=MUTED, fontsize=8, ha="right")
+    return fig, ax
+
+def janela_pts(a, b):
+    ks = [k for k in serie if a <= k <= b]
+    return [xm(k) for k in ks], [brl[k] for k in ks]
+
+# ---- 1) 1 ano depois: linha mensal + 6 janelas destacadas
+fig, ax = base_mensal("O dólar no 1º ano de cada governo", "Linha mensal do dólar. Em destaque: de novembro da eleição a novembro do ano seguinte")
+ax.plot(SX, SY, color="#c3cbbf", lw=2, zorder=1)
 for e in ELEICOES:
     a, b = um[e]; v = var(brl, a, b); c = cor(v)
-    ax.plot([e, e + 1], [brl[a], brl[b]], color=c, lw=5, solid_capstyle="round")
-    ax.scatter([e, e + 1], [brl[a], brl[b]], s=45, color=c, zorder=3)
-    for x, dx, ha, k in ((e, -.14, "right", a), (e + 1, .14, "left", b)):
-        ax.text(x + dx, brl[k], rs(brl[k]), ha=ha, va="center", fontsize=8.5, color=MUTED)
-    y = max(brl[a], brl[b]) + .3
-    ax.text(e + .5, y, rot(v), ha="center", va="bottom", fontsize=16, fontweight="bold", color=c)
-xt(ax, ELEICOES, [f"Nov/{e}" for e in ELEICOES])
+    ax.axvspan(xm(a), xm(b), color=tint(c), zorder=0)
+    x, y = janela_pts(a, b)
+    ax.plot(x, y, color=c, lw=4.5, solid_capstyle="round", zorder=3)
+    ax.scatter([x[0]], [y[0]], s=70, color=BG, edgecolor=c, lw=2.2, zorder=4)
+    ax.scatter([x[-1]], [y[-1]], s=70, color=c, zorder=4)
+    top = max(y) + .3
+    xc = (x[0] + x[-1]) / 2 + (.9 if e == 2002 else 0)
+    ax.text(xc, top + .28, rot(v), ha="center", va="bottom", fontsize=16, fontweight="bold", color=c)
+    ax.text(xc, top, f"{rs(brl[a])} → {rs(brl[b])}", ha="center", va="bottom", fontsize=8.5, color=MUTED)
 fig.savefig("grafico_1_ano_nov_a_nov.png", facecolor=BG); plt.close(fig)
 
-# ---- 2) ciclo de 4 anos
-fig, ax = base("Ciclos de 4 anos: o dólar subiu nos 3 últimos fechados",
-               "Variação de novembro de uma eleição a novembro da seguinte. O ciclo de 2022 é parcial (até set/2026)", 2027.6, 7.0, FONTE)
-pts = ELEICOES
-for i, e in enumerate(pts[:-1]):
-    a, b = ciclo[e]; v = var(brl, a, b); c = cor(v); n = pts[i + 1]
-    ax.plot([e, n], [brl[a], brl[b]], color=c, lw=5, solid_capstyle="round")
-    ym = (brl[a] + brl[b]) / 2
-    ax.text((e + n) / 2 - .35, ym + .7, rot(v), ha="center", va="bottom", fontsize=16, fontweight="bold", color=c)
-a, b = ciclo[2022]; v = var(brl, a, b)
-ax.plot([2022, 2026.75], [brl[a], brl[b]], color="#a5aca2", lw=5, ls=(0, (1, 1.6)), solid_capstyle="round")
-ax.scatter([2026.75], [brl[b]], s=40, color="#a5aca2", zorder=3)
-ax.text(2026.2, brl[b] - .5, f"até set/2026\n{rot(v)}", ha="center", va="top", fontsize=10, color=MUTED, fontweight="bold", linespacing=1.35)
-ax.scatter(pts, [brl[(e, 11)] for e in pts], s=110, color=BG, edgecolor=INK, lw=2.2, zorder=3)
-for e in pts: ax.text(e, brl[(e, 11)] - .28, rs(brl[(e, 11)]), ha="center", va="top", fontsize=10.5, color=INK)
-xt(ax, pts + [2026.75], [f"Nov/{e}" for e in pts] + ["Set/2026"])
+# ---- 2) ciclos de 4 anos: linha mensal colorida por ciclo
+fig, ax = base_mensal("Ciclos de 4 anos: o dólar subiu nos 3 últimos fechados",
+                      "Linha mensal do dólar. Cada faixa vai de novembro de uma eleição a novembro da seguinte (2022 é parcial, até set/2026)")
+for i, e in enumerate(ELEICOES):
+    a, b = ciclo[e]; v = var(brl, a, b); parcial = e == 2022
+    c = "#8f978c" if parcial else cor(v)
+    x0, x1 = xm(a), xm(b)
+    if i % 2 == 0: ax.axvspan(x0, x1, color=tint(c, .10), zorder=0)
+    x, y = janela_pts(a, b)
+    ax.plot(x, y, color=c, lw=4, solid_capstyle="round", zorder=3, **({"ls": (0, (1, 1.4))} if parcial else {}))
+    ax.axvline(x0, color=INK, lw=1, alpha=.35, zorder=1)
+    ax.scatter([x0], [brl[a]], s=80, color=BG, edgecolor=INK, lw=2, zorder=4)
+    ax.text(x0, brl[a] - .3, rs(brl[a]), ha="center", va="top", fontsize=9, color=INK, fontweight="bold")
+    m = (x0 + x1) / 2
+    ax.text(m, 6.95, rot(v) + (" *" if parcial else ""), ha="center", va="top", fontsize=17, fontweight="bold", color=c)
+    ax.text(m, 6.35, f"Nov/{a[0]} → " + (f"Set/{b[0]}" if parcial else f"Nov/{b[0]}"), ha="center", va="top", fontsize=8.5, color=MUTED)
+ax.scatter([xm(HOJE)], [brl[HOJE]], s=60, color="#8f978c", zorder=4)
+ax.text(xm(HOJE), brl[HOJE] - .3, rs(brl[HOJE]), ha="center", va="top", fontsize=9, color=MUTED, fontweight="bold")
+ax.axvline(xm((2022, 11)), color=INK, lw=1, alpha=.35, zorder=1)
+fig.text(.07, .075, "* ciclo em andamento", color=MUTED, fontsize=8)
 fig.savefig("grafico_ciclo_4_anos_nov_a_nov.png", facecolor=BG); plt.close(fig)
 
 # ---- 3) USD/BRL x DXY, série mensal contínua, base 100 em nov/2002
