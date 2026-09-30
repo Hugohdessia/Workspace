@@ -1,0 +1,61 @@
+"""Quando o DXY subiu: as 6 grandes altas (>= +10%) desde 2001, só o índice.
+
+DXY: Investing (futuros, fechamento mensal). Motivos: contexto histórico (não calculado).
+"""
+import csv, datetime as dt
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+from matplotlib import font_manager as fm
+
+dxy = {}
+for r in csv.DictReader(open("dados/dxy_futuros_mensal.csv", encoding="utf-8-sig")):
+    x = dt.datetime.strptime(r["Data"], "%d.%m.%Y").date(); dxy[(x.year, x.month)] = float(r["Último"].replace(",", "."))
+ks = sorted(dxy); xm = lambda k: k[0] + k[1] / 12
+MES = ["", "jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"]
+
+ALTAS = [((2004, 12), (2005, 11), "Fed sobe juros e a economia americana se recupera"),
+         ((2008, 3), (2009, 2), "Crise financeira global: corrida ao dólar como porto seguro"),
+         ((2009, 11), (2010, 5), "Crise da dívida na Europa enfraquece o euro"),
+         ((2011, 4), (2016, 12), "Fed sai do estímulo e sobe juros, enquanto BCE e Japão seguem afrouxando"),
+         ((2018, 1), (2020, 3), "Guerra comercial e, em mar/2020, corrida ao dólar na pandemia"),
+         ((2020, 12), (2022, 9), "Fed sobe juros mais rápido que os outros e guerra na Ucrânia")]
+
+BG, INK, MUTED, GRID = "#f4f6f3", "#1b2419", "#5f6b5c", "#dfe4dc"
+BLUE, GLINE = "#2f5f99", "#b9c4d0"
+plt.rcParams["font.family"] = "Liberation Sans" if any("Liberation Sans" in f.name for f in fm.fontManager.ttflist) else "DejaVu Sans"
+rot = lambda v: f"{v:+.1f}%".replace(".", ",")
+tint = lambda c, a: matplotlib.colors.to_rgba(c, a)
+
+fig = plt.figure(figsize=(10, 7.2), dpi=200, facecolor=BG)
+fig.text(.05, .93, "Quando o dólar no mundo (DXY) subiu", color=INK, fontsize=24, fontweight="bold")
+fig.text(.05, .888, "As 6 grandes altas do DXY desde 2001 (subidas de pelo menos +10%)", color=MUTED, fontsize=11)
+ax = fig.add_axes([.07, .50, .89, .34], facecolor=BG)
+xs = [xm(k) for k in ks]
+ax.plot(xs, [dxy[k] for k in ks], color=GLINE, lw=2.4, zorder=2)
+ax.set_xlim(2001, 2027); ax.set_ylim(66, 130)
+ax.set_yticks([])
+for sp in ax.spines.values(): sp.set_visible(False)
+for v in (80, 100): ax.axhline(v, color=GRID, lw=.8, zorder=0); ax.text(2000.9, v, str(v), ha="right", va="center", fontsize=8.5, color=MUTED)
+ax.set_xticks(range(2002, 2027, 2)); ax.set_xticklabels([str(y) for y in range(2002, 2027, 2)], fontsize=8.5, color=MUTED)
+ax.tick_params(length=0, pad=6)
+rows = []
+for i, (a, b, motivo) in enumerate(ALTAS, 1):
+    v = 100 * (dxy[b] / dxy[a] - 1)
+    ax.axvspan(xm(a), xm(b), color=tint(BLUE, .13), lw=0, zorder=0)
+    kk = [k for k in ks if a <= k <= b]
+    ax.plot([xm(k) for k in kk], [dxy[k] for k in kk], color=BLUE, lw=4.4, solid_capstyle="round", zorder=4)
+    ax.text((xm(a) + xm(b)) / 2, 128, str(i), ha="center", va="top", fontsize=12, fontweight="bold", color="white",
+            bbox=dict(boxstyle="circle,pad=.35", fc=BLUE, ec="none"))
+    rows.append((i, a, b, v, motivo))
+fig.text(.05, .445, "O que puxou cada alta", color=INK, fontsize=13, fontweight="bold")
+y = .400
+for i, a, b, v, motivo in rows:
+    fig.text(.05, y, str(i), color="white", fontsize=9, fontweight="bold", ha="center", va="center", bbox=dict(boxstyle="circle,pad=.3", fc=BLUE, ec="none"))
+    fig.text(.075, y, rot(v), color=BLUE, fontsize=11, fontweight="bold", va="center")
+    fig.text(.155, y, f"{MES[a[1]]}/{a[0]} a {MES[b[1]]}/{b[0]}", color=MUTED, fontsize=9.5, va="center")
+    fig.text(.29, y, motivo, color=INK, fontsize=10, va="center")
+    y -= .062
+fig.text(.05, .045, "Motivos: contexto histórico (não calculado nos dados).", color=MUTED, fontsize=8.5)
+fig.text(.95, .018, "Fonte: Investing (DXY futuros, fechamento mensal)", color=MUTED, fontsize=8, ha="right")
+fig.savefig("grafico_dxy_altas.png", facecolor=BG); plt.close(fig)
