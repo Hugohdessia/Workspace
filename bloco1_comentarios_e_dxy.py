@@ -26,35 +26,33 @@ plt.rcParams["font.family"] = "Liberation Sans" if any("Liberation Sans" in f.na
 rot = lambda v: f"{v:+.1f}%".replace(".", ",").replace("-", "−")
 cor = lambda v: UP if v > 0 else DOWN
 
-# ------------------------------------------------------------------ (a) comentários
-COM = {2002: ("Lula eleito após a corrida ao dólar de 2002; a confiança volta e o dólar recua do pico pré-eleição",
-              "Dólar fraco no mundo e mais apetite por risco"),
-       2006: ("Economia estável, inflação baixa e juros em queda, num boom de commodities",
-              "Dólar fraco no mundo e crescimento global forte"),
-       2010: ("Alta concentrada em set/2011 (+18% no mês), num momento de aversão a risco",
-              "Crise da dívida na Europa leva investidores ao dólar, mas o DXY fecha o ano em queda"),
-       2014: ("Reeleição de Dilma, crise fiscal, recessão e perda do grau de investimento em 2015",
-              "Fim do estímulo do Fed, BCE começa a comprar títulos e as commodities despencam"),
-       2018: ("Bolsonaro eleito; o dólar sobe com ruído político antes da reforma da Previdência",
-              "DXY quase parado; guerra comercial entre EUA e China"),
-       2022: ("Lula eleito; dúvida fiscal no fim de 2022 e depois o arcabouço fiscal, com juros altos",
-              "Dólar perde força no mundo depois do pico de set/2022")}
-fig = plt.figure(figsize=(10, 7.6), dpi=200, facecolor=BG)
-fig.text(.05, .94, "O que estava acontecendo em cada período", color=INK, fontsize=22, fontweight="bold")
-fig.text(.05, .905, "12 meses após cada eleição (de novembro a novembro)", color=MUTED, fontsize=11)
-y = .845
-for e in ELE:
-    br, mu = COM[e]
-    fig.text(.05, y, f"{e} → {e+1}", color=INK, fontsize=12.5, fontweight="bold", va="center")
-    fig.text(.05, y - .030, f"Dólar {rot(vb[e])}", color=cor(vb[e]), fontsize=11.5, fontweight="bold", va="center")
-    fig.text(.05, y - .054, f"DXY {rot(vd[e])}", color=BLUE, fontsize=10.5, fontweight="bold", va="center")
-    fig.text(.23, y + .003, "BRASIL", color=MUTED, fontsize=8, fontweight="bold", va="center")
-    fig.text(.29, y + .003, br, color=INK, fontsize=9.6, va="center")
-    fig.text(.23, y - .033, "MUNDO", color=MUTED, fontsize=8, fontweight="bold", va="center")
-    fig.text(.29, y - .033, mu, color=INK, fontsize=9.6, va="center")
-    fig.add_artist(plt.Line2D([.05, .95], [y - .070, y - .070], color=GRID, lw=1))
-    y -= .128
-fig.text(.05, .028, "Comentários: contexto histórico, não calculado nos dados. Variações: Investing, fechamento mensal (USD/BRL e DXY futuros).", color=MUTED, fontsize=8)
+# ------------------------------------------------------------------ (a) comentários (cartões curtos)
+from matplotlib.patches import FancyBboxPatch
+TAGS = {2002: ("Confiança volta após a eleição", "Dólar fraco, mais apetite por risco"),
+        2006: ("Inflação baixa e juros em queda", "Boom de commodities"),
+        2010: ("Alta concentrada em set/2011", "Crise do euro"),
+        2014: ("Crise fiscal e recessão", "Fim do estímulo do Fed"),
+        2018: ("Ruído político pós-eleição", "Guerra comercial EUA-China"),
+        2022: ("Dúvida fiscal, depois arcabouço", "Dólar perde força após o pico")}
+fig = plt.figure(figsize=(10, 6.2), dpi=200, facecolor=BG)
+fig.text(.05, .92, "O que estava por trás de cada período", color=INK, fontsize=23, fontweight="bold")
+fig.text(.05, .875, "12 meses após cada eleição, de novembro a novembro", color=MUTED, fontsize=11)
+W, H, GX, GY = .285, .355, .0325, .045
+for i, e in enumerate(ELE):
+    col, row = i % 3, i // 3
+    x0 = .05 + col * (W + GX); y0 = .47 - row * (H + GY)
+    fig.add_artist(FancyBboxPatch((x0, y0), W, H, boxstyle="round,pad=0,rounding_size=.012", transform=fig.transFigure,
+                                  fc="white", ec=GRID, lw=1.2))
+    fig.text(x0 + .02, y0 + H - .04, f"{e} → {e+1}", color=MUTED, fontsize=10.5, fontweight="bold", va="center")
+    fig.text(x0 + .02, y0 + H - .10, rot(vb[e]), color=cor(vb[e]), fontsize=24, fontweight="bold", va="center")
+    fig.text(x0 + .02, y0 + H - .152, f"DXY {rot(vd[e])}", color=BLUE, fontsize=10.5, fontweight="bold", va="center")
+    fig.add_artist(plt.Line2D([x0 + .02, x0 + W - .02], [y0 + .135, y0 + .135], color=GRID, lw=1))
+    br, mu = TAGS[e]
+    fig.text(x0 + .02, y0 + .105, "BRASIL", color=MUTED, fontsize=7.5, fontweight="bold", va="center")
+    fig.text(x0 + .02, y0 + .083, br, color=INK, fontsize=9.3, va="center")
+    fig.text(x0 + .02, y0 + .052, "MUNDO", color=MUTED, fontsize=7.5, fontweight="bold", va="center")
+    fig.text(x0 + .02, y0 + .030, mu, color=INK, fontsize=9.3, va="center")
+fig.text(.05, .028, "Dólar = USD/BRL. Motivos: contexto histórico, não calculado nos dados. Fonte: Investing (fechamento mensal).", color=MUTED, fontsize=8)
 fig.savefig("bloco1_comentarios_periodos.png", facecolor=BG); plt.close(fig)
 
 # ------------------------------------------------------------------ (b) aqui x mundo
