@@ -29,7 +29,7 @@ tint = lambda c, a: matplotlib.colors.to_rgba(c, a)
 
 CURTO = {1: "Fed sobe juros", 2: "Crise financeira", 3: "Crise do euro", 4: "Fed x BCE e Japão",
          5: "Guerra comercial e Covid", 6: "Fed e Ucrânia"}
-ALTURA = {1: 134, 2: 134, 3: 120, 4: 134, 5: 134, 6: 134}
+ALTURA = {1: 134, 2: 134, 3: 120, 4: 134, 5: 120, 6: 134}
 fig = plt.figure(figsize=(10, 5.8), dpi=200, facecolor=BG)
 fig.text(.05, .89, "Quando o dólar no mundo (DXY) subiu", color=INK, fontsize=24, fontweight="bold")
 fig.text(.05, .825, "As 6 grandes altas do DXY desde 2001 (subidas de pelo menos +10%) e o que estava por trás", color=MUTED, fontsize=11)
