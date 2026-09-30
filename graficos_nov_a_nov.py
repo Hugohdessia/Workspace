@@ -111,26 +111,22 @@ for e in ELEICOES:
     ax.text(xc, top, f"{rs(brl[a])} → {rs(brl[b])}", ha="center", va="bottom", fontsize=8.5, color=MUTED)
 fig.savefig("grafico_1_ano_nov_a_nov.png", facecolor=BG); plt.close(fig)
 
-# ---- 2) ciclos de 4 anos: linha mensal colorida por ciclo
+# ---- 2) ciclos de 4 anos: mesmo estilo do gráfico 1, valores no eixo
 fig, ax = base_mensal("Ciclos de 4 anos: o dólar subiu nos 3 últimos fechados",
-                      "Linha mensal do dólar. Cada faixa vai de novembro de uma eleição a novembro da seguinte (2022 é parcial, até set/2026)")
-for i, e in enumerate(ELEICOES):
+                      "De novembro de uma eleição a novembro da seguinte. O ciclo de 2022 é parcial (até set/2026)", ymax=7.6)
+GREY = "#8f978c"
+for e in ELEICOES:
     a, b = ciclo[e]; v = var(brl, a, b); parcial = e == 2022
-    c = "#8f978c" if parcial else cor(v)
-    x0, x1 = xm(a), xm(b)
-    if i % 2 == 0: ax.axvspan(x0, x1, color=tint(c, .10), zorder=0)
+    c = GREY if parcial else cor(v)
     x, y = janela_pts(a, b)
-    ax.plot(x, y, color=c, lw=4, solid_capstyle="round", zorder=3, **({"ls": (0, (1, 1.4))} if parcial else {}))
-    ax.axvline(x0, color=INK, lw=1, alpha=.35, zorder=1)
-    ax.scatter([x0], [brl[a]], s=80, color=BG, edgecolor=INK, lw=2, zorder=4)
-    ax.text(x0, brl[a] - .3, rs(brl[a]), ha="center", va="top", fontsize=9, color=INK, fontweight="bold")
-    m = (x0 + x1) / 2
-    ax.text(m, 6.95, rot(v) + (" *" if parcial else ""), ha="center", va="top", fontsize=17, fontweight="bold", color=c)
-    ax.text(m, 6.35, f"Nov/{a[0]} → " + (f"Set/{b[0]}" if parcial else f"Nov/{b[0]}"), ha="center", va="top", fontsize=8.5, color=MUTED)
-ax.scatter([xm(HOJE)], [brl[HOJE]], s=60, color="#8f978c", zorder=4)
-ax.text(xm(HOJE), brl[HOJE] - .3, rs(brl[HOJE]), ha="center", va="top", fontsize=9, color=MUTED, fontweight="bold")
-ax.axvline(xm((2022, 11)), color=INK, lw=1, alpha=.35, zorder=1)
-fig.text(.07, .075, "* ciclo em andamento", color=MUTED, fontsize=8)
+    ax.axvspan(xm(a), xm(b), color=tint(c, .13), ec=BG, lw=2, zorder=0)
+    ax.plot(x, y, color=c, lw=3.6, solid_capstyle="round", zorder=3)
+    ax.scatter([x[0]], [y[0]], s=75, color=BG, edgecolor=c, lw=2.2, zorder=4)
+    ax.scatter([x[-1]], [y[-1]], s=75, color=c, zorder=4)
+    m = (x[0] + x[-1]) / 2
+    ax.text(m, 7.5, rot(v) + (" *" if parcial else ""), ha="center", va="top", fontsize=18, fontweight="bold", color=c)
+    ax.text(m, 6.9, f"{rs(brl[a])} → {rs(brl[b])}", ha="center", va="top", fontsize=9, color=MUTED)
+fig.text(.07, .075, "* ciclo em andamento: Nov/2022 a Set/2026", color=MUTED, fontsize=8)
 fig.savefig("grafico_ciclo_4_anos_nov_a_nov.png", facecolor=BG); plt.close(fig)
 
 # ---- 3) USD/BRL x DXY, série mensal contínua, base 100 em nov/2002
