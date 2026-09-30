@@ -151,44 +151,32 @@ ax.set_xlim(2001.6, 2030.2)
 xt(ax, [xn((e, 11)) for e in ELEICOES], [f"Nov/{e}" for e in ELEICOES])
 fig.savefig("grafico_usdbrl_vs_dxy_nov_a_nov.png", facecolor=BG); plt.close(fig)
 
-# ---- 4) só o DXY: ciclos de 4 anos + 1º ano de cada ciclo em destaque
-dsx = [xm(k) for k in sorted(dxy) if k >= (2002, 6)]
+# ---- 4) só o DXY (limpo): ciclos em faixas + 1º ano em destaque
 dsk = [k for k in sorted(dxy) if k >= (2002, 6)]
-dsy = [dxy[k] for k in dsk]
 dvar = lambda a, b: var(dxy, a, b)
+DB, GLINE, INKG = "#2f5f99", "#b9c4d0", "#3d4a3a"
 fig = plt.figure(figsize=(10, 5.6), dpi=200, facecolor=BG)
 fig.text(.05, .86, "O dólar no mundo (DXY) nos ciclos de eleição", color=INK, fontsize=24, fontweight="bold")
-fig.text(.05, .795, "De novembro de uma eleição brasileira a novembro da seguinte. Faixa mais escura = 1º ano do ciclo", color=MUTED, fontsize=11)
+fig.text(.05, .795, "Em cima: variação do ciclo de 4 anos (nov a nov). Em azul: o 1º ano de cada ciclo", color=MUTED, fontsize=11)
 ax = fig.add_axes([.07, .14, .89, .58], facecolor=BG)
-ax.set_xlim(2002.3, 2029.2); ax.set_ylim(60, 127)
-for v in (80, 90, 100, 110):
+ax.set_xlim(2002.3, 2029.4); ax.set_ylim(66, 124)
+for v in (80, 100):
     ax.axhline(v, color=GRID, lw=.8, zorder=0); ax.text(2002.2, v, str(v), ha="right", va="center", fontsize=8.5, color=MUTED)
 ax.set_yticks([])
 for sp in ax.spines.values(): sp.set_visible(False)
-anos_t = [y for y in range(2002, 2027) if y in ELEICOES or (y - 2002) % 4 == 2 or y == 2026]
-ax.set_xticks([y + 11 / 12 for y in anos_t])
-ax.set_xticklabels([f"Nov/{y}" if y in ELEICOES else str(y) for y in anos_t], fontsize=8, color=MUTED)
-for lab, y in zip(ax.get_xticklabels(), anos_t):
-    if y in ELEICOES: lab.set_color(INK); lab.set_fontweight("bold"); lab.set_fontsize(9.5)
+ax.set_xticks([e + 11 / 12 for e in ELEICOES] + [xm(HOJE)])
+ax.set_xticklabels([f"Nov/{e}" for e in ELEICOES] + ["Set/2026"], fontsize=9.5, color=INK, fontweight="bold")
 ax.tick_params(axis="x", length=0, pad=8)
-DB, DB2, DBG = "#2f5f99", "#1c3f6e", "#8aa0b8"   # azul DXY: linha, 1º ano (mais escuro), parcial
+ax.plot([xm(k) for k in dsk], [dxy[k] for k in dsk], color=GLINE, lw=2.2, zorder=2)
 for i, e in enumerate(ELEICOES):
-    a, b = ciclo[e]; v = dvar(a, b); parcial = e == 2022
-    c = DBG if parcial else DB
-    u1 = um[e]; v1 = dvar(*u1)
-    ax.axvspan(xm(a), xm(b), color=tint(DB, .10 if i % 2 == 0 else .04), ec=BG, lw=2, zorder=0)
-    ax.axvspan(xm(u1[0]), xm(u1[1]), color=tint(DB, .20), zorder=0)
-    ks = [k for k in dsk if a <= k <= b]
-    ax.plot([xm(k) for k in ks], [dxy[k] for k in ks], color=c, lw=3, solid_capstyle="round", zorder=3)
+    a, b = ciclo[e]; v = dvar(a, b); u1 = um[e]; v1 = dvar(*u1)
+    if i % 2 == 0: ax.axvspan(xm(a), xm(b), color=tint(DB, .06), lw=0, zorder=0)
     k1 = [k for k in dsk if u1[0] <= k <= u1[1]]
-    ax.plot([xm(k) for k in k1], [dxy[k] for k in k1], color=DB2, lw=5, solid_capstyle="round", zorder=4)
-    ax.scatter([xm(a)], [dxy[a]], s=75, color=BG, edgecolor=c, lw=2.2, zorder=5)
-    ax.scatter([xm(b)], [dxy[b]], s=75, color=c, zorder=5)
-    m = (xm(u1[1]) + xm(b)) / 2
-    ax.text(m, 126, rot(v) + (" *" if parcial else ""), ha="center", va="top", fontsize=18, fontweight="bold", color=c if not parcial else "#6b7f96")
-    ax.text(m, 119.5, f"{dxy[a]:.1f} → {dxy[b]:.1f}".replace(".", ","), ha="center", va="top", fontsize=9, color=MUTED)
-    ax.text((xm(u1[0]) + xm(u1[1])) / 2, 61.5, f"1º ano\n{rot(v1)}", ha="center", va="bottom", fontsize=8.5, fontweight="bold", color=DB2, linespacing=1.3)
-ax.text(xm(HOJE) + .35, dxy[HOJE], f"DXY\n{dxy[HOJE]:.1f}".replace(".", ",") + "\n(set/2026)", ha="left", va="center", fontsize=11, fontweight="bold", color=DB, linespacing=1.3)
+    x1 = [xm(k) for k in k1]; y1 = [dxy[k] for k in k1]
+    ax.plot(x1, y1, color=DB, lw=5, solid_capstyle="round", zorder=4)
+    ax.text((x1[0] + x1[-1]) / 2 + (.9 if e == 2022 else 0), max(y1) + 3, rot(v1), ha="center", va="bottom", fontsize=13, fontweight="bold", color=DB)
+    ax.text((xm(a) + xm(b)) / 2, 122.5, rot(v) + (" *" if e == 2022 else ""), ha="center", va="top", fontsize=17, fontweight="bold", color=INKG)
+ax.text(xm(HOJE) + .4, dxy[HOJE], f"DXY\n{dxy[HOJE]:.1f}".replace(".", ","), ha="left", va="center", fontsize=11, fontweight="bold", color=DB, linespacing=1.3)
 fig.text(.07, .075, "* ciclo em andamento: Nov/2022 a Set/2026", color=MUTED, fontsize=8)
 fig.text(.95, .04, "Fonte: Investing (DXY futuros, fechamento mensal). Base: fechamento de novembro do ano da eleição", color=MUTED, fontsize=8, ha="right")
 fig.savefig("grafico_dxy_nov_a_nov.png", facecolor=BG); plt.close(fig)
