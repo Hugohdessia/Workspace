@@ -17,7 +17,7 @@ BRL = Image.open("imagens/real_nota.jpg").convert("RGB")
 fig = plt.figure(figsize=(10, 8.2), dpi=200, facecolor=BG)
 F = fig.add_axes([0, 0, 1, 1]); F.set_xlim(0, 1); F.set_ylim(0, 1); F.axis("off"); F.patch.set_alpha(0)
 fig.text(.05, .945, "Como as forças puxam o dólar", color=INK, fontsize=26, fontweight="bold")
-fig.text(.05, .905, "A direção da seta mostra o efeito sobre o dólar: para cima, ele sobe; para baixo, ele cai", color=MUTED, fontsize=11)
+fig.text(.05, .905, "Brasil: seta para cima = bem, para baixo = em dúvida. Mundo: dólar forte sobe, dólar fraco desce. O resultado é o dólar no Brasil", color=MUTED, fontsize=11)
 # US$ -> R$ no canto
 for im, x in ((USD, .80), (BRL, .90)):
     a = fig.add_axes([x, .935, .075, .04]); a.imshow(im); a.axis("off")
@@ -48,7 +48,9 @@ def card(x0, y0, titulo, brasil, mundo, resultado, exemplo):
     # Resultado
     icone(USD, xs[2], base, .095)
     fig.text(xs[2], base - .047, "Dólar no Brasil", color=INK, fontsize=9.5, ha="center", va="center", fontweight="bold")
-    cor_brasil = UP if "bem" in brasil[0] else DOWN      # verde = Brasil bem, vermelho = Brasil em dúvida
+    bem = "bem" in brasil[0]
+    cor_brasil = UP if bem else DOWN      # verde = Brasil bem (seta para cima), vermelho = Brasil em dúvida (para baixo)
+    brasil = (brasil[0], (1 if bem else -1, brasil[1][1]))
     for cx, (sent, L), cor in zip(xs[:2], (brasil[1], mundo[1]), (cor_brasil, BLUE)):
         seta(cx, base + .035 if sent > 0 else base + .035 + L, sent * L, cor)
     sent, L = resultado[1]
