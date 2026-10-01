@@ -18,7 +18,8 @@ press = [i for i, f in enumerate(folga) if f >= 0.03]
 print("pressionados:", [(nomes[i], round(folga[i], 2)) for i in press])
 hsv = mc.rgb_to_hsv(a / 255); h = hsv[..., 0] * 360; s = hsv[..., 1]; vv = hsv[..., 2]
 tan = (h > 25) & (h < 50) & (s > 0.10) & (s < 0.55) & (vv > 0.58) & (vv < 0.92)
-reg = np.zeros((H, W), bool); reg[168:470, :] = True; reg[180:200, 340:370] = True
+reg = np.zeros((H, W), bool); reg[180:200, 340:370] = True   # legenda
+for i in press: reg[168:470, cx[i] - 33:cx[i] + 34] = True   # só barras acima da mediana ficam vermelhas
 mask = tan & reg
 alpha = np.clip(n(a - BG) / n(TAN - BG), 0, 1)[..., None]
 out = a.copy(); out[mask] = (BG * (1 - alpha) + RED * alpha)[mask]
