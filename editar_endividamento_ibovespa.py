@@ -1,11 +1,11 @@
 """Recolore a imagem 'Endividamento Privado - Ibovespa': barras em vermelho, realce em vermelho pastel nos setores
-mais pressionados (barra pelo menos 0,10 acima da mediana de 6 anos, valores lidos da imagem) e remove o círculo amarelo."""
+mais pressionados (barra pelo menos 0,03 acima da mediana de 6 anos, valores lidos da imagem) e remove o círculo amarelo."""
 import sys
 from PIL import Image, ImageFilter
 import numpy as np, matplotlib.colors as mc
 src = sys.argv[1]
 im = Image.open(src).convert("RGB"); a = np.asarray(im).astype(float); H, W, _ = a.shape
-BG = np.array([246, 249, 246.]); TAN = np.array([186, 172, 152.]); RED = np.array([214, 40, 40.]); PASTEL = np.array([250, 214, 210.])
+BG = np.array([246, 249, 246.]); TAN = np.array([186, 172, 152.]); RED = np.array([226, 120, 112.]); PASTEL = np.array([252, 226, 222.])
 n = lambda x: np.linalg.norm(x, axis=-1)
 nomes = ["Serviços de Comunicação", "Materiais Básicos", "Petróleo e Gás", "Construção Civil", "Varejo", "Tecnologia", "Saúde", "Imobiliário",
          "Consumo Discricionário", "Educação", "Indústria", "Bens de Consumo", "Energia Elétrica e Saneamento"]
@@ -14,7 +14,7 @@ topo = [357, 326, 350, 203, 266, 333, 265, 281, 311, 213, 296, 248, 271]
 marc = [345.5, 360, 395.5, 320.5, 279.5, 370.5, 278.5, 309.5, 299.5, 209.5, 291.5, 296.5, 338]
 v = lambda y: (459 - y) / 352.5          # eixo: 0 em y=459 e 0,8 em y=177
 folga = [v(t) - v(m) for t, m in zip(topo, marc)]
-press = [i for i, f in enumerate(folga) if f >= 0.095]
+press = [i for i, f in enumerate(folga) if f >= 0.03]
 print("pressionados:", [(nomes[i], round(folga[i], 2)) for i in press])
 hsv = mc.rgb_to_hsv(a / 255); h = hsv[..., 0] * 360; s = hsv[..., 1]; vv = hsv[..., 2]
 tan = (h > 25) & (h < 50) & (s > 0.10) & (s < 0.55) & (vv > 0.58) & (vv < 0.92)
@@ -29,4 +29,5 @@ for i in press:
 yl = (h > 28) & (h < 68) & (s > 0.20) & (vv > 0.75); yl[70:, :] = False; yl[:, :int(W * 0.8)] = False
 ym = np.asarray(Image.fromarray((yl * 255).astype(np.uint8)).filter(ImageFilter.MaxFilter(11))) > 0; ym[70:, :] = False; ym[:, :int(W * 0.8)] = False
 out[ym] = BG
+out[515:, int(W*0.88):] = BG   # logo Nomad
 Image.fromarray(out.clip(0, 255).astype(np.uint8)).resize((W * 2, H * 2), Image.LANCZOS).save("endividamento_privado_ibovespa_vermelho.png")
