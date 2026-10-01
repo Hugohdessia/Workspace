@@ -1,4 +1,4 @@
-"""Troca os amarelos da imagem 'Endividamento Privado - Inadimplência' por vermelhos e remove os logos da Nomad."""
+"""Troca os amarelos das imagens de Endividamento Privado (uso: src.png saida.png) por vermelhos e remove os logos da Nomad."""
 import sys
 from PIL import Image
 import numpy as np, matplotlib.colors as mc
@@ -11,6 +11,6 @@ line = yel & (s >= 0.5); k = np.clip((s - 0.3) / 0.3, 0, 1)[..., None]
 pale = yel & (s >= 0.12) & (s < 0.5); kp = np.clip(s / 0.45, 0, 1)[..., None]
 out[line] = (BG * (1 - k) + RED * k)[line]
 out[pale] = (BG * (1 - kp) + PAST * kp)[pale]
-out[:45, int(W * 0.88):] = BG      # logo do topo (círculo amarelo)
-out[540:, int(W * 0.87):] = BG     # logo de baixo
-Image.fromarray(out.clip(0, 255).astype(np.uint8)).resize((W * 2, H * 2), Image.LANCZOS).save("inadimplencia_vermelho.png")
+out[:int(H*0.125), int(W*0.88):int(W*0.97)] = BG      # logo do topo (círculo amarelo)
+out[int(H*0.93):, int(W*0.87):] = BG     # logo de baixo
+Image.fromarray(out.clip(0, 255).astype(np.uint8)).resize((W * 2, H * 2), Image.LANCZOS).save(sys.argv[2])
